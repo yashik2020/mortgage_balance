@@ -8,7 +8,6 @@ class PAYEMNT_FRE(Enum):
     WEEKLY = 54
     BIWEEKLY = 27
 
-
 price= 830_000
 down_payment= 130_000
 utility= 650
@@ -19,16 +18,32 @@ rent= 2800
 rent_increment = 1.025
 year_freq = PAYEMNT_FRE.MONTHLY
 
-def mortgage_balance_calculator(**kwargs):
-    price= kwargs.get('price')
-    down_payment= kwargs.get('down_payment')
-    utility= kwargs.get('utility')
-    utility_increment = kwargs.get('utility_increment')
-    apr= kwargs.get('apr')
-    ammortization= kwargs.get('ammortization')
-    rent= kwargs.get('rent')
-    rent_increment = kwargs.get('rent_increment')
-    year_freq = kwargs.get('year_freq')
+default_params = {
+                    'price': 830_000,
+                    'down_payment': 130_000,
+                    'utility': 650,
+                    'utility_increment': 1.01,
+                    'apr': 0.07,
+                    'ammortization': 25,
+                    'rent': 2800,
+                    'rent_increment': 1.025,
+                    'year_freq': PAYEMNT_FRE.MONTHLY,
+                }
+
+
+def mortgage_balance_calculator(parameters, **kwargs):
+    try:
+        price= parameters['price']
+        down_payment= parameters['down_payment']
+        utility= parameters['utility']
+        utility_increment = parameters['utility_increment']
+        apr= parameters['apr']
+        ammortization= parameters['ammortization']
+        rent= parameters['rent']
+        rent_increment = parameters['rent_increment']
+        year_freq = parameters['year_freq']
+    except KeyError:
+        return KeyError('Parameters are not set correctly')
     
     rent = rent * 12
     utility = utility * 12
