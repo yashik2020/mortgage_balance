@@ -92,7 +92,7 @@ def mortgage_balance_calculator(parameters, **kwargs):
     df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].apply(lambda x: round(x, 2))
     df['rent Save Cumulative'] = df['rent Save Cumulative'].apply(lambda x: round(x, 2))
 
-    if kwargs.get('writ_to_file') == True:
+    if kwargs.get('write_to_file') == True:
         df.to_excel(path.join(path.dirname(__file__), 'ammortization.xlsx'), index=False)
 
     return df

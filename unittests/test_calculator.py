@@ -1,8 +1,13 @@
 import app.mortgage_calculator as mc
+from app.mortgage_calculator import PAYEMNT_FRE
+import pytest
+from itertools import product
 
-AMMORTIZATION= 25
+AMMORTIZATION_VALUES = [25, 20, 30]
+FREQ_VALUES = [f for f in PAYEMNT_FRE]
+INPUT_VALUES = list(product(AMMORTIZATION_VALUES, FREQ_VALUES))
 
-params_default = {
+params = {
                     'price': 830_000,
                     'down_payment': 130_000,
                     'utility': 650,
@@ -11,28 +16,13 @@ params_default = {
                     'ammortization': 25,
                     'rent': 2800,
                     'rent_increment': 1.025,
-                    'year_freq': mc.PAYEMNT_FRE.MONTHLY,
+                    'year_freq': PAYEMNT_FRE.MONTHLY,
                 }
 
-params_weekly_25 = params_default.copy()
-params_weekly_25['year_freq'] = mc.PAYEMNT_FRE.WEEKLY
-params_biweekly_25 = params_default.copy()
-params_biweekly_25['year_freq'] = mc.PAYEMNT_FRE.BIWEEKLY
-params_monthly_25 = params_default.copy()
-params_monthly_25['year_freq'] = mc.PAYEMNT_FRE.MONTHLY
 
-
-def test_lenght_monthly():
-    df = mc.mortgage_balance_calculator(params_monthly_25)
-    assert len(df) == mc.PAYEMNT_FRE.MONTHLY.value * AMMORTIZATION
-
-
-def test_lenght_biweekly():
-    df = mc.mortgage_balance_calculator(params_biweekly_25)
-    assert len(df) == mc.PAYEMNT_FRE.BIWEEKLY.value * AMMORTIZATION
-
-
-def test_lenght_weekly():
-    df = mc.mortgage_balance_calculator(params_weekly_25)
-    assert len(df) == mc.PAYEMNT_FRE.WEEKLY.value * AMMORTIZATION
-
+@pytest.mark.parametrize("ammortization_length,period_count", INPUT_VALUES)
+def test_lenght(ammortization_length, period_count):
+    params['year_freq'] = period_count
+    params['ammortization'] = ammortization_length
+    df = mc.mortgage_balance_calculator(params)
+    assert len(df) == period_count.value * ammortization_length
