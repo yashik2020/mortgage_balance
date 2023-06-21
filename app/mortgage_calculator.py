@@ -31,7 +31,7 @@ default_params = {
                 }
 
 
-def mortgage_balance_calculator(parameters, **kwargs):
+def mortgage_balance_calculator(parameters=default_params, **kwargs):
     try:
         price= parameters['price']
         down_payment= parameters['down_payment']
@@ -59,8 +59,8 @@ def mortgage_balance_calculator(parameters, **kwargs):
         'Mortgage Payment',
         'Interest Paid',
         'Principal Paid',
-        'utility',
-        'rent'
+        'Utility',
+        'Rent'
     ])
 
     df.loc[len(df)] = [1, principal, 
@@ -85,25 +85,20 @@ def mortgage_balance_calculator(parameters, **kwargs):
         temp = [round(x, 2) for x in temp]
         df.loc[len(df)] = temp
 
-    df['Costs Paid Cumulative'] = df['Interest Paid'] + df['utility']
+    df['Costs Paid Cumulative'] = df['Interest Paid'] + df['Utility']
+    df['Interest Paid Cumulative'] = df['Interest Paid'].cumsum()
+    df['Utility Paid Cumulative'] = df['Utility'].cumsum()
     df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].cumsum()
-    df['rent Save Cumulative'] = df['rent'].cumsum()
+    df['Rent Save Cumulative'] = df['Rent'].cumsum()
 
     df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].apply(lambda x: round(x, 2))
-    df['rent Save Cumulative'] = df['rent Save Cumulative'].apply(lambda x: round(x, 2))
+    df['Rent Save Cumulative'] = df['Rent Save Cumulative'].apply(lambda x: round(x, 2))
+    df['Interest Paid Cumulative'] = df['Interest Paid Cumulative'].apply(lambda x: round(x, 2))
+    df['Utility Paid Cumulative'] = df['Utility Paid Cumulative'].apply(lambda x: round(x, 2))
+
+    df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
 
     if kwargs.get('write_to_file') == True:
         df.to_excel(path.join(path.dirname(__file__), 'ammortization.xlsx'), index=False)
 
     return df
-# t = mortgage_balance_calculator(price= 830_000
-#                                 ,down_payment= 130_000
-#                                 ,utility= 650
-#                                 ,utility_increment = 1.01
-#                                 ,apr= 0.07
-#                                 ,ammortization= 25
-#                                 ,rent= 2800
-#                                 ,rent_increment = 1.025
-#                                 )
-
-# print(t.tail())
