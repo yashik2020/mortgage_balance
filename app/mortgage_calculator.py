@@ -8,6 +8,10 @@ class PaymentFre(Enum):
     WEEKLY = 54
     BIWEEKLY = 27
 
+
+PROPERTY_TAX = 0.66
+LAND_TRANSFER = 20_000
+
 default_params = {
                     'price': 830_000,
                     'down_payment': 130_000,
@@ -51,6 +55,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         'Interest Paid',
         'Principal Paid',
         'Utility',
+        'Property Tax',
         'Rent'
     ])
 
