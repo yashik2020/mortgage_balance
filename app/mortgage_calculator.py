@@ -1,22 +1,12 @@
-import pandas as pd
-from enum import Enum
 from os import path
+from enum import Enum
+import pandas as pd
 
 
-class PAYEMNT_FRE(Enum):
+class PaymentFre(Enum):
     MONTHLY = 12
     WEEKLY = 54
     BIWEEKLY = 27
-
-price= 830_000
-down_payment= 130_000
-utility= 650
-utility_increment = 1.01
-apr= 0.07
-ammortization= 25
-rent= 2800
-rent_increment = 1.025
-year_freq = PAYEMNT_FRE.MONTHLY
 
 default_params = {
                     'price': 830_000,
@@ -27,7 +17,7 @@ default_params = {
                     'ammortization': 25,
                     'rent': 2800,
                     'rent_increment': 1.025,
-                    'year_freq': PAYEMNT_FRE.MONTHLY,
+                    'year_freq': PaymentFre.MONTHLY,
                 }
 
 
@@ -42,8 +32,9 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         rent= parameters['rent']
         rent_increment = parameters['rent_increment']
         year_freq = parameters['year_freq']
-    except KeyError:
-        return KeyError('Parameters are not set correctly')
+    except KeyError as exc:
+        #TODO: Handle the input error
+        raise KeyError('Parameters are not set correctly') from exc
     
     rent = rent * 12
     utility = utility * 12
@@ -74,10 +65,10 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
     for i in range(2, ammortization * year_freq.value + 1):
         last_year = df[df.Period == i - 1]
         starting_principal = last_year.iloc[0]['Starting Principal'] - last_year.iloc[0]['Principal Paid']
-        temp = [i, 
-                starting_principal, 
-                period_payment, 
-                (apr / year_freq.value) * starting_principal, 
+        temp = [i,
+                starting_principal,
+                period_payment,
+                (apr / year_freq.value) * starting_principal,
                 period_payment -  ((apr / year_freq.value) * starting_principal),
                 (utility * (utility_increment ** ((i-1)//year_freq.value))) / year_freq.value,
                 (rent * (rent_increment ** ((i-1)//year_freq.value))) / year_freq.value,
@@ -98,7 +89,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
 
     df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
 
-    if kwargs.get('write_to_file') == True:
+    if kwargs.get('write_to_file') is True:
         df.to_excel(path.join(path.dirname(__file__), 'ammortization.xlsx'), index=False)
 
     return df
