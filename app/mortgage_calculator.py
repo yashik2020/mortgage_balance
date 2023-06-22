@@ -9,8 +9,9 @@ class PaymentFre(Enum):
     BIWEEKLY = 27
 
 
-PROPERTY_TAX = 0.66
+PROPERTY_TAX = 0.0066
 LAND_TRANSFER = 20_000
+INVESTMENT_RATE = 0.04
 
 default_params = {
                     'price': 830_000,
@@ -56,16 +57,20 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         'Principal Paid',
         'Utility',
         'Property Tax',
+        'Investment Income',
         'Rent'
     ])
 
-    df.loc[len(df)] = [1, principal, 
-            period_payment, 
-            round((apr / year_freq.value) * principal ,2),
-            round(period_payment -  ((apr / year_freq.value) * principal), 2),
-            round(utility / year_freq.value, 2),
-            round(rent / year_freq.value, 2),
-            ]
+    df.loc[len(df)] = [1, 
+                       principal,
+                       period_payment,
+                       (apr / year_freq.value) * principal,
+                       period_payment -  ((apr / year_freq.value) * principal),
+                       utility / year_freq.value,
+                       (price * PROPERTY_TAX) / year_freq.value,
+                       (down_payment * INVESTMENT_RATE) / year_freq.value,
+                       rent / year_freq.value,
+                       ]
 
     for i in range(2, ammortization * year_freq.value + 1):
         last_year = df[df.Period == i - 1]
@@ -76,6 +81,8 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
                 (apr / year_freq.value) * starting_principal,
                 period_payment -  ((apr / year_freq.value) * starting_principal),
                 (utility * (utility_increment ** ((i-1)//year_freq.value))) / year_freq.value,
+                (price * PROPERTY_TAX) / year_freq.value,
+                (down_payment * INVESTMENT_RATE) / year_freq.value,
                 (rent * (rent_increment ** ((i-1)//year_freq.value))) / year_freq.value,
                 ]
         temp = [round(x, 2) for x in temp]
@@ -86,13 +93,10 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
     df['Utility Paid Cumulative'] = df['Utility'].cumsum()
     df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].cumsum()
     df['Rent Save Cumulative'] = df['Rent'].cumsum()
-
-    df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].apply(lambda x: round(x, 2))
-    df['Rent Save Cumulative'] = df['Rent Save Cumulative'].apply(lambda x: round(x, 2))
-    df['Interest Paid Cumulative'] = df['Interest Paid Cumulative'].apply(lambda x: round(x, 2))
-    df['Utility Paid Cumulative'] = df['Utility Paid Cumulative'].apply(lambda x: round(x, 2))
-
     df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
+
+
+    df = df.apply(lambda x: round(x, 2))
 
     if kwargs.get('write_to_file') is True:
         df.to_excel(path.join(path.dirname(__file__), 'ammortization.xlsx'), index=False)
