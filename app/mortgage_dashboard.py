@@ -58,25 +58,16 @@ fig_cost_benefit = px.line(df,
 
 st.plotly_chart(fig_cost_benefit)
 
-fig_cost_benefit_diff = px.line(
+
+### Bar chart showing the balance of the whole adventure
+fig_cost_benefit_diff = px.bar(
                            x=df['Period'],
                            y= df['Profit and Liquidity'] - df['Costs Cumulative'],
                            title='Balance',
                            labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
                            )
-fig_cost_benefit_diff.add_hline(y=0, line_dash='dash', line_color='green')
+fig_cost_benefit_diff.update_traces(marker_color=np.where(df['Profit and Liquidity'] - df['Costs Cumulative'] < 0, 'red', 'green'))
 st.plotly_chart(fig_cost_benefit_diff)
-
-
-
-fig_cost_benefit_diff_2 = px.bar(
-                           x=df['Period'],
-                           y= df['Profit and Liquidity'] - df['Costs Cumulative'],
-                           title='Balance',
-                           labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
-                           )
-fig_cost_benefit_diff_2.update_traces(marker_color=np.where(df['Profit and Liquidity'] - df['Costs Cumulative'] < 0, 'red', 'green'))
-st.plotly_chart(fig_cost_benefit_diff_2)
 
 
 ### Area chart for rolling sume of costs ###
