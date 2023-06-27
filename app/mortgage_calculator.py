@@ -11,7 +11,9 @@ class PaymentFre(Enum):
 
 PROPERTY_TAX = 0.0066
 LAND_TRANSFER = 20_000
+CLOSING_FEE = 0.025
 INVESTMENT_RATE = 0.04
+
 
 default_params = {
                     'price': 830_000,
@@ -23,6 +25,7 @@ default_params = {
                     'rent': 2800,
                     'rent_increment': 1.025,
                     'year_freq': PaymentFre.MONTHLY,
+                    'appreciation': 0.04,
                 }
 
 
@@ -37,6 +40,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         rent= parameters['rent']
         rent_increment = parameters['rent_increment']
         year_freq = parameters['year_freq']
+        appreciation = parameters['appreciation']
     except KeyError as exc:
         #TODO: Handle the input error
         raise KeyError('Parameters are not set correctly') from exc
@@ -57,8 +61,9 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         'Principal Paid',
         'Utility',
         'Property Tax',
-        'Investment Income',
-        'Rent'
+        'Investment Loss',
+        'Rent',
+        'Property Appreciation',
     ])
 
     df.loc[len(df)] = [1, 
@@ -70,6 +75,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
                        (price * PROPERTY_TAX) / year_freq.value,
                        (down_payment * INVESTMENT_RATE) / year_freq.value,
                        rent / year_freq.value,
+                       (price * appreciation) / year_freq.value,
                        ]
 
     for i in range(2, ammortization * year_freq.value + 1):
@@ -84,16 +90,20 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
                 (price * PROPERTY_TAX) / year_freq.value,
                 (down_payment * INVESTMENT_RATE) / year_freq.value,
                 (rent * (rent_increment ** ((i-1)//year_freq.value))) / year_freq.value,
+                ((price * appreciation) * ((1+appreciation) ** (i//year_freq.value))) / year_freq.value,
                 ]
         temp = [round(x, 2) for x in temp]
         df.loc[len(df)] = temp
 
-    df['Costs Paid Cumulative'] = df['Interest Paid'] + df['Utility']
+    df['Costs'] = df['Interest Paid'] + df['Utility'] + df['Property Tax'] + df['Investment Loss']
     df['Interest Paid Cumulative'] = df['Interest Paid'].cumsum()
     df['Utility Paid Cumulative'] = df['Utility'].cumsum()
-    df['Costs Paid Cumulative'] = df['Costs Paid Cumulative'].cumsum()
+    df['Costs Cumulative'] = df['Costs'].cumsum()
+    df['Costs Cumulative'] = df['Costs Cumulative'] + (CLOSING_FEE * price)
     df['Rent Save Cumulative'] = df['Rent'].cumsum()
     df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
+    df['Profit and Liquidity'] = df['Rent'] + df['Principal Paid']
+    df['Profit and Liquidity'] = df['Profit and Liquidity'].cumsum()
 
 
     df = df.apply(lambda x: round(x, 2))
@@ -102,3 +112,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
         df.to_excel(path.join(path.dirname(__file__), 'ammortization.xlsx'), index=False)
 
     return df
+
+# df = mortgage_balance_calculator()
+
+# print(df.head())
