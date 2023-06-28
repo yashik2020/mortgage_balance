@@ -3,6 +3,8 @@ import plotly.express as px
 import streamlit as st
 import numpy as np
 
+st.set_page_config(page_title="Mortgage Balance", layout="wide")
+
 
 params = dict()
 params['price'] = st.sidebar.slider('Price: ', 0, 10_000_000, value=700_000, step=50_000)
@@ -48,51 +50,53 @@ st.write(f'Payment amount: {mortgage_payment}')
 # if st.button('Save to file'):
 #     df.to_excel('sample.xlsx')
 
+col_left, col_right = st.columns([0.5, 0.5])
 
-### Line chart comparing cumulative costs and benefits
-fig_cost_benefit = px.line(df,
-                           x='Period',
-                           y=['Costs Cumulative', 'Profit and Liquidity'],
-                           title='Cost and Benefit (Breakeven)',
-                           )
+with col_left:
+    ### Line chart comparing cumulative costs and benefits
+    fig_cost_benefit = px.line(df,
+                            x='Period',
+                            y=['Costs Cumulative', 'Profit and Liquidity'],
+                            title='Cost and Benefit (Breakeven)',
+                            )
 
-st.plotly_chart(fig_cost_benefit)
+    st.plotly_chart(fig_cost_benefit)
+
+with col_right:
+    ### Bar chart showing the balance of the whole adventure
+    fig_cost_benefit_diff = px.bar(
+                            x=df['Period'],
+                            y= df['Profit and Liquidity'] - df['Costs Cumulative'],
+                            title='Balance',
+                            labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
+                            )
+    fig_cost_benefit_diff.update_traces(marker_color=np.where(df['Profit and Liquidity'] - df['Costs Cumulative'] < 0, 'red', 'green'))
+    st.plotly_chart(fig_cost_benefit_diff)
+
+with col_left:
+    ### Area chart for rolling sume of costs ###
+    fig_rolling_cost = px.area(df,
+                            x='Period',
+                            y=['Utility Paid Cumulative', 'Interest Paid Cumulative'],
+                            title='Costs Breakdown',
+                            )
+    # Updating the labels since mutiple values is not supported by labels attribute
+    new_labels={
+                'Utility Paid Cumulative': 'Utility',
+                'Interest Paid Cumulative': 'Interest',
+                }
+    fig_rolling_cost.for_each_trace(lambda x: x.update(name=new_labels.get(x.name)))
+    st.plotly_chart(fig_rolling_cost)
 
 
-### Bar chart showing the balance of the whole adventure
-fig_cost_benefit_diff = px.bar(
-                           x=df['Period'],
-                           y= df['Profit and Liquidity'] - df['Costs Cumulative'],
-                           title='Balance',
-                           labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
-                           )
-fig_cost_benefit_diff.update_traces(marker_color=np.where(df['Profit and Liquidity'] - df['Costs Cumulative'] < 0, 'red', 'green'))
-st.plotly_chart(fig_cost_benefit_diff)
-
-
-### Area chart for rolling sume of costs ###
-fig_rolling_cost = px.area(df,
-                           x='Period',
-                           y=['Utility Paid Cumulative', 'Interest Paid Cumulative'],
-                           title='Rolling sum of costs',
-                           )
-# Updating the labels since mutiple values is not supported by labels attribute
-new_labels={
-            'Utility Paid Cumulative': 'Utility',
-            'Interest Paid Cumulative': 'Interest',
-            }
-fig_rolling_cost.for_each_trace(lambda x: x.update(name=new_labels.get(x.name)))
-st.plotly_chart(fig_rolling_cost)
-
-
-
-fig_payment_breakdown = px.area(df,
-                                x='Period',
-                                y='Interest Ratio',
-                                title='Ratio of Interest on each Mortgage Payment',
-                                labels={'Period': 'Period', 'Interest Ratio': 'Interest (%)'}
-                                )
-st.plotly_chart(fig_payment_breakdown)
+with col_right:
+    fig_payment_breakdown = px.area(df,
+                                    x='Period',
+                                    y='Interest Ratio',
+                                    title='Ratio of Interest on each Mortgage Payment',
+                                    labels={'Period': 'Period', 'Interest Ratio': 'Interest (%)'}
+                                    )
+    st.plotly_chart(fig_payment_breakdown)
 
 # st.line_chart(df, x='Period', y='Costs Paid Cumulative')
 st.dataframe(df)
