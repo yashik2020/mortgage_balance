@@ -11,7 +11,7 @@ class PaymentFre(Enum):
 
 PROPERTY_TAX = 0.0066
 LAND_TRANSFER = 20_000
-CLOSING_FEE = 0.025
+CLOSING_FEE = 0.03
 INVESTMENT_RATE = 0.04
 
 
@@ -99,7 +99,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
     df['Interest Paid Cumulative'] = df['Interest Paid'].cumsum()
     df['Utility Paid Cumulative'] = df['Utility'].cumsum()
     df['Costs Cumulative'] = df['Costs'].cumsum()
-    df['Costs Cumulative'] = df['Costs Cumulative'] + (CLOSING_FEE * price)
+    # df['Costs Cumulative'] = df['Costs Cumulative'] + (CLOSING_FEE * price)
     df['Rent Save Cumulative'] = df['Rent'].cumsum()
     df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
     df['Profit and Liquidity'] = df['Rent'] + df['Principal Paid']
