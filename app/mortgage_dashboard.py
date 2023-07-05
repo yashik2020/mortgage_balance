@@ -50,23 +50,21 @@ main_df = mc.mortgage_balance_calculator(params)
 col1, col2, _ = st.columns(3)
 with col1:
     st.title('Mortgage or Rent?')
-    selected_period = st.slider('Show calculations up to year',
+    st.markdown("""
+            With higher interest rates, are you wondering if it makes sense to keep on renting or buy a house and move in? 
+            Want to now in short to mid term what amount of property appreciation is going to cover the costs and make buying a propery a sound investment?
+            Enter the values based on your situation on the side bar to get an overview of the numbers. 
+
+            **You can select a point in mortgage term to see the situation at the end of that year.**
+            """)
+    selected_period = st.slider('Show calculations up to year:',
                                 min_value=1,
                                 max_value=params['ammortization'],
                                 value=params['ammortization'],
                                 step=1)
 
-with col2:
-    
-    st.text("""
-            With higher interest rates, are you wondering if it makes sense to keep on renting or buy a house and move in? 
-            Want to now in short to mid term what amount of property appreciation is going to cover the costs and make buying a propery a sound investment?
-            Enter the values based on your situation to get an overview of the numbers. 
-            """)
 
 df = main_df[main_df['Period'] <= selected_period * params['year_freq'].value]
-
-
 summary_values = {
     'Mortgage Payment amount': df.iloc[1]['Mortgage Payment'],
     'Number of Payments': df.iloc[-1]['Period'],
@@ -78,6 +76,17 @@ summary_values = {
     'Property Value': params['price'],
     'Rent Saved': df.iloc[-1]['Rent Save Cumulative'],
 }
+
+with col1:
+    col1_1, col1_2 = st.columns(2)
+    with col1_1:
+        st.markdown(':red[**Total Costs:**]')
+        st.markdown(':green[**Total Savings & Value:**]') 
+    with col1_2:
+        st.markdown(f'{df.iloc[-1]["Costs Cumulative"]:,}')
+        st.markdown(f'{df.iloc[-1]["Profit and Liquidity"] + summary_values.get("Closing Fee"):,}')
+    
+
 
 with col2:
     _, col2_1, _ = st.columns([.25, .5, .25])
