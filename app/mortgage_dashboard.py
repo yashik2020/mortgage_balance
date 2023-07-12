@@ -23,7 +23,7 @@ else:
                                                params['price'] // 2,
                                                value=70_000,
                                                step=5000)
-params['utility'] = st.sidebar.number_input('Utility (Per Month)', 100, 3000, value=600, step=50)
+params['utility'] = st.sidebar.number_input('Utility & Maintenance (Per Month)', 100, 3000, value=800, step=50)
 params['apr'] = st.sidebar.number_input('APR', 0.5, 10.0, value=5.5, step=0.25)/100
 params['ammortization'] = st.sidebar.selectbox('Ammortization Period (Years)',
                                                list(range(10, 36, 5)),
