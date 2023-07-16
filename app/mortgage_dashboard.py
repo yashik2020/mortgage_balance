@@ -75,37 +75,43 @@ summary_values = {
     'Down Payment Opportunity Cost': df['Investment Loss'].sum(),
     'Property Value': params['price'],
     'Rent Saved': df.iloc[-1]['Rent Save Cumulative'],
+    'Total Cost': df.iloc[-1]["Costs Cumulative"],
+    'Total Savings & Equity': df.iloc[-1]["Profit and Liquidity"],
+    'Balance': df.iloc[-1]["Profit and Liquidity"] - df.iloc[-1]["Costs Cumulative"],
 }
 
 with col1:
     col1_1, col1_2 = st.columns(2)
     with col1_1:
         st.markdown(':red[**Total Costs:**]')
-        st.markdown(':green[**Total Savings & Value:**]') 
+        st.markdown(':green[**Total Savings & Equity:**]') 
+        st.markdown(':blue[**Balance:**]')
+        st.markdown(':orange[**Required Appreciation:**]')
     with col1_2:
-        st.markdown(f'{df.iloc[-1]["Costs Cumulative"]:,}')
-        st.markdown(f'{df.iloc[-1]["Profit and Liquidity"] + summary_values.get("Closing Fee"):,}')
+        st.markdown(f'{summary_values["Total Cost"]:,}')
+        st.markdown(f'{summary_values["Total Savings & Equity"]:,}')
+        st.markdown(f'{summary_values["Balance"]:,.2f}')
+        st.markdown(f'{(summary_values["Total Savings & Equity"] - summary_values["Total Cost"])*(-100) / params["price"] if summary_values["Balance"] < 0 else 0:,.2f} %', help="The property price appreciation required to breakeven (Capital Gain Tax not included!)")
+
     
 
 
 with col2:
-    _, col2_1, _ = st.columns([.25, .5, .25])
-    with col2_1:
-        st.subheader('Summary')
-        summary = pd.DataFrame(index=summary_values.keys(), data=summary_values.values(), columns=['Value (CAD)'])
+    ### Bar chart showing the balance of the whole adventure
+    fig_cost_benefit_diff = px.bar(
+                            x=df['Period'],
+                            y= df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE),
+                            title='Balance',
+                            labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
+                            )
+    fig_cost_benefit_diff.update_traces(
+        marker_color=np.where(
+            df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE) < 0, 
+            'red', 
+            'green')
+            )
+    st.plotly_chart(fig_cost_benefit_diff)
 
-
-        def highlighter(s):
-            if s.name == 'Total Cost':
-                return ["color: red"] * len(s)
-            elif s.name == 'Total Value':
-                return ["color: green"] * len(s)
-            else:
-                return [""] * len(s)
-
-        st.dataframe(summary.style.format('{:,.0f}')
-                    .apply(highlighter, axis=1),
-                    height=425)
 
 
 # summary_md =f"""
@@ -133,38 +139,25 @@ with col2:
 
 col_left, col_right = st.columns([0.5, 0.5])
 
-with col_left:
-    ### Line chart comparing cumulative costs and benefits
-    fig_cost_benefit = px.line(df,
-                            x='Period',
-                            y=['Costs Cumulative', 'Profit and Liquidity'],
-                            title='Cost and Benefit (Breakeven)',
-                            )
+# with col_left:
+#     ### Line chart comparing cumulative costs and benefits
+#     fig_cost_benefit = px.line(df,
+#                             x='Period',
+#                             y=['Costs Cumulative', 'Profit and Liquidity'],
+#                             title='Cost and Benefit (Breakeven)',
+#                             )
 
-    st.plotly_chart(fig_cost_benefit)
+#     st.plotly_chart(fig_cost_benefit)
 
-with col_right:
-    ### Bar chart showing the balance of the whole adventure
-    fig_cost_benefit_diff = px.bar(
-                            x=df['Period'],
-                            y= df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE),
-                            title='Balance',
-                            labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
-                            )
-    fig_cost_benefit_diff.update_traces(
-        marker_color=np.where(
-            df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE) < 0, 
-            'red', 
-            'green')
-            )
-    st.plotly_chart(fig_cost_benefit_diff)
+# with col_right:
+#     st.empty()
 
 with col_left:
     ### Area chart for rolling sume of costs ###
     fig_rolling_cost = px.area(df,
                             x='Period',
                             y=['Utility Paid Cumulative', 'Interest Paid Cumulative'],
-                            title='Costs Breakdown',
+                            title='Rolling Costs Breakdown',
                             )
     # Updating the labels since mutiple values is not supported by labels attribute
     new_labels={
@@ -186,5 +179,24 @@ with col_right:
 
 # st.line_chart(df, x='Period', y='Costs Paid Cumulative')
 
+_, col2_1, _ = st.columns([.25, .5, .25])
+with col2_1:
+    st.subheader('Summary')
+    summary = pd.DataFrame(index=summary_values.keys(), data=summary_values.values(), columns=['Value (CAD)'])
+
+
+    def highlighter(s):
+        if s.name == 'Total Cost':
+            return ["color: red"] * len(s)
+        elif s.name == 'Total Value':
+            return ["color: green"] * len(s)
+        else:
+            return [""] * len(s)
+
+    st.dataframe(summary.style.format('{:,.0f}')
+                .apply(highlighter, axis=1),
+                height=460)
+
+
 #TODO: Remove raw dataframe from view
-st.dataframe(df)
+# st.dataframe(df)
