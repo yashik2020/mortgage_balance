@@ -11,7 +11,7 @@ The idea is to calculate and compare:
 - The amount you are paying as costs and fees
 - The amount you are saving by not paying rent
 - The amount you will be losing by putting down payment
-- The amount is accrued in the estate by paying off the loan principal
+- The amount is accrued as equity by paying off the loan principal
 
 Bring all this together and you will have an idea on the economies of purchasing a house, specially if you are looking at it as an short to mid term investment. 
 
