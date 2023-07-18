@@ -88,7 +88,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
                 period_payment -  ((apr / year_freq.value) * starting_principal),
                 (utility * (utility_increment ** ((i-1)//year_freq.value))) / year_freq.value,
                 (price * PROPERTY_TAX) / year_freq.value,
-                (down_payment * INVESTMENT_RATE) / year_freq.value,
+                ((down_payment * ((1+INVESTMENT_RATE) ** ((i-1)//year_freq.value)))*INVESTMENT_RATE) / year_freq.value,
                 (rent * (rent_increment ** ((i-1)//year_freq.value))) / year_freq.value,
                 ((price * appreciation) * ((1+appreciation) ** (i//year_freq.value))) / year_freq.value,
                 ]
