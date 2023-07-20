@@ -24,8 +24,12 @@ else:
                                                params['price'] // 2,
                                                value=70_000,
                                                step=5000)
-params['utility'] = st.sidebar.number_input('Utility & Maintenance (Per Month)', 100, 3000, value=800, step=50)
-params['apr'] = st.sidebar.number_input('APR', 0.5, 10.0, value=5.5, step=0.25)/100
+params['utility'] = st.sidebar.number_input('Utility & Maintenance (Per Month)',
+                                            100,
+                                            3000,
+                                            value=900,
+                                            step=50)
+params['apr'] = st.sidebar.number_input('APR', 0.5, 10.0, value=6.0, step=0.25)/100
 params['ammortization'] = st.sidebar.selectbox('Ammortization Period (Years)',
                                                list(range(10, 36, 5)),
                                                index=3)
@@ -84,6 +88,7 @@ summary_values = {
     'Balance': df.iloc[-1]["Profit and Liquidity"] - (df.iloc[-1]["Costs Cumulative"] + params['price'] * mc.CLOSING_FEE),
 }
 
+
 with col1:
     col1_1, col1_2 = st.columns(2)
     with col1_1:
@@ -97,8 +102,6 @@ with col1:
         st.markdown(f'{summary_values["Balance"]:,.2f}')
         st.markdown(f'{(summary_values["Total Savings & Equity"] - summary_values["Total Cost"])*(-100) / params["price"] if summary_values["Balance"] < 0 else 0:,.2f} %', 
                     help="The property price appreciation required to breakeven (Capital Gain Tax not included!)")
-
-    
 
 
 with col2:
@@ -121,36 +124,55 @@ with col2:
                     height=495)
     
 
-# row2_c1, row2_c2, row2_c3 = st.columns([.2, .7, .1])
-# row2_c1 = st.empty()
-# row2_c3 = st.empty()
-# with row2_c2:
-# Balance Bar Chart
-fig_cost_benefit_diff = px.bar(
-                        x=df['Period'],
-                        y= df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE),
-                        title='Balance',
-                        labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
-                        )
-fig_cost_benefit_diff.update_traces(
-    marker_color=np.where(
-        df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE) < 0, 
-        'red', 
-        'green')
-        )
-st.plotly_chart(fig_cost_benefit_diff, use_container_width=True)
-#\ Balance Bar Chart
+col_left, col_right = st.columns([0.5, 0.5])
+
+with col_left:
+    # Balance Bar Chart
+    fig_cost_benefit_diff = px.bar(
+                            x=df['Period'],
+                            y= df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE),
+                            title='Balance',
+                            labels={'y': 'Balance (Cost - Benefit)', 'x': 'Period'}
+                            )
+    fig_cost_benefit_diff.update_traces(
+        marker_color=np.where(
+            df['Profit and Liquidity'] - (df['Costs Cumulative'] + params['price'] * mc.CLOSING_FEE) < 0, 
+            'red', 
+            'green')
+            )
+    st.plotly_chart(fig_cost_benefit_diff) #, use_container_width=True)
+    #\ Balance Bar Chart
 
 # if st.button('Save to file'):
 #     df.to_excel('sample.xlsx')
 
-col_left, col_right = st.columns([0.5, 0.5])
+with col_right:
+    # Payment Breakdown Graph
+    fig_payment_breakdown = go.Figure()
+    fig_payment_breakdown.add_trace(go.Scatter(
+        name = 'Interest',
+        x = df['Period'],
+        y = df['Interest Paid'],
+        stackgroup='one',
+        line = dict(color='#96121b')
+    ))
+    fig_payment_breakdown.add_trace(go.Scatter(
+        name = 'Principal',
+        x = df['Period'],
+        y = df['Principal Paid'],
+        stackgroup='one',
+        line = dict(color='green')
+    ))
+    fig_payment_breakdown.update_layout(title='Ratio of Interest/Principal paid on each Payment')
+    st.plotly_chart(fig_payment_breakdown)
+    #\ Payment Breakdown Graph
+
 
 with col_left:
     # Rolling cost breakdown Graph
     fig_rolling_cost = go.Figure()
     trace_names = ['Closing Fee',
-                   'Lost Investment Opportunity',
+                   'Investment Loss',
                    'Property Tax',
                    'Utility & Maintenance',
                    'Interest'
@@ -179,7 +201,7 @@ with col_left:
     #\ Rolling cost breakdown Graph
 
 with col_right:
-    # Rolling Savings & Equity Breakdown
+    # Rolling Savings & Equity Breakdown Graph
     fig_rolling_save = go.Figure()
     fig_rolling_save.add_trace(go.Scatter(
         name='Equity in porperty',
@@ -199,20 +221,7 @@ with col_right:
         title='Rolling Savings Breakdown'
     )
     st.plotly_chart(fig_rolling_save)
-
-
-    #\ Rolling Savings & Equity Breakdown
-
-with col_left:
-    fig_payment_breakdown = px.area(df,
-                                    x='Period',
-                                    y='Interest Ratio',
-                                    title='Ratio of Interest on each Mortgage Payment',
-                                    labels={'Period': 'Period', 'Interest Ratio': 'Interest (%)'}
-                                    )
-    st.plotly_chart(fig_payment_breakdown)
-
-
+    #\ Rolling Savings & Equity Breakdown Graph
 
 
 #TODO: Remove raw dataframe from view
