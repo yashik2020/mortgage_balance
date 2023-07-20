@@ -149,46 +149,32 @@ col_left, col_right = st.columns([0.5, 0.5])
 with col_left:
     # Rolling cost breakdown Graph
     fig_rolling_cost = go.Figure()
-    fig_rolling_cost.add_trace(go.Scatter(
-        name='Closing Fee',
-        x=df['Period'],
-        y=[params['price'] * mc.CLOSING_FEE]*len(df),
-        stackgroup='one',
-        line=dict(color='#9ce82c')
-    ))
-    fig_rolling_cost.add_trace(go.Scatter(
-        name='Lost Investment Opportunity',
-        x=df['Period'],
-        y=df['Investment Loss'].cumsum(),
-        stackgroup='one',
-        line=dict(color='#E8df2c')
-    ))
-    fig_rolling_cost.add_trace(go.Scatter(
-        name='Property Tax',
-        x=df['Period'],
-        y=df['Property Tax'].cumsum(),
-        stackgroup='one',
-        line=dict(color='#Ff8700')
-    ))
-    fig_rolling_cost.add_trace(go.Scatter(
-        name='Utility & Maintenance',
-        x=df['Period'],
-        y=df['Utility Paid Cumulative'],
-        stackgroup='one',
-        line=dict(color='#96121b')
-    ))
-    fig_rolling_cost.add_trace(go.Scatter(
-        name='Interest',
-        x=df['Period'],
-        y=df['Interest Paid Cumulative'],
-        stackgroup='one',
-        line=dict(color='#2b165c')
-    ))
+    trace_names = ['Closing Fee',
+                   'Lost Investment Opportunity',
+                   'Property Tax',
+                   'Utility & Maintenance',
+                   'Interest'
+                   ]
+    trace_y = [[params['price'] * mc.CLOSING_FEE]*len(df), 
+               df['Investment Loss'].cumsum(),
+               df['Property Tax'].cumsum(),
+               df['Utility Paid Cumulative'],
+               df['Interest Paid Cumulative'],
+               ]
+    trace_colors = ['#9ce82c', '#E8df2c', '#Ff8700', '#96121b', '#2b165c']
+    
+    for item in zip(trace_names, trace_y, trace_colors):
+        fig_rolling_cost.add_trace(go.Scatter(
+            name = item[0],
+            x = df['Period'],
+            y = item[1],
+            stackgroup='one',
+            line = dict(color=item[2]),
+        ))
     fig_rolling_cost.update_layout(
         title='Rolling Cost Breakdown',
     )
     
-
     st.plotly_chart(fig_rolling_cost)
     #\ Rolling cost breakdown Graph
 
