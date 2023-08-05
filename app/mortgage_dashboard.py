@@ -9,6 +9,16 @@ import pandas as pd
 st.set_page_config(page_title="Mortgage Balance", layout="wide")
 
 
+def highlighter(s):
+    '''Defining colors to highlight main values in summary table'''
+    if s.name == 'Total Cost':
+        return ["color: red"] * len(s)
+    elif s.name == 'Total Savings & Equity':
+        return ["color: green"] * len(s)
+    else:
+        return [""] * len(s)
+
+
 params = dict()
 params['price'] = st.sidebar.number_input('Price', 0, 10_000_000, value=700_000, step=50_000)
 percent_of_price = st.sidebar.checkbox('Donwnpayment as percentage', value=True)
@@ -109,16 +119,6 @@ with col2:
     with col2_1:
         st.subheader('Summary')
         summary = pd.DataFrame(index=summary_values.keys(), data=summary_values.values(), columns=['Value (CAD)'])
-
-
-        def highlighter(s):
-            if s.name == 'Total Cost':
-                return ["color: red"] * len(s)
-            elif s.name == 'Total Value':
-                return ["color: green"] * len(s)
-            else:
-                return [""] * len(s)
-
         st.dataframe(summary.style.format('{:,.0f}')
                     .apply(highlighter, axis=1),
                     height=495)
