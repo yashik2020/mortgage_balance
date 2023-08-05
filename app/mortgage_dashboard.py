@@ -163,7 +163,9 @@ with col_right:
         stackgroup='one',
         line = dict(color='green')
     ))
-    fig_payment_breakdown.update_layout(title='Ratio of Interest/Principal paid on each Payment')
+    fig_payment_breakdown.update_layout(title='Ratio of Interest/Principal paid on each Payment', 
+                                        xaxis_title='Period',
+                                        yaxis_title='Value (CAD)')
     st.plotly_chart(fig_payment_breakdown)
     #\ Payment Breakdown Graph
 
@@ -195,6 +197,8 @@ with col_left:
         ))
     fig_rolling_cost.update_layout(
         title='Rolling Cost Breakdown',
+        xaxis_title='Period',
+        yaxis_title='Value (CAD)'
     )
     
     st.plotly_chart(fig_rolling_cost)
@@ -218,7 +222,9 @@ with col_right:
         line=dict(color='lightgreen')
     ))
     fig_rolling_save.update_layout(
-        title='Rolling Savings Breakdown'
+        title='Rolling Savings Breakdown',
+        xaxis_title='Period',
+        yaxis_title='Value (CAD)'
     )
     st.plotly_chart(fig_rolling_save)
     #\ Rolling Savings & Equity Breakdown Graph
