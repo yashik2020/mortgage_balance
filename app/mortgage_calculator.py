@@ -5,8 +5,8 @@ import pandas as pd
 
 class PaymentFre(Enum):
     MONTHLY = 12
-    WEEKLY = 54
-    BIWEEKLY = 27
+    WEEKLY = 52
+    BIWEEKLY = 26
 
 
 PROPERTY_TAX = 0.0066
