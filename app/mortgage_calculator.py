@@ -102,6 +102,7 @@ def mortgage_balance_calculator(parameters=default_params, **kwargs):
     # df['Costs Cumulative'] = df['Costs Cumulative'] + (CLOSING_FEE * price)
     df['Rent Save Cumulative'] = df['Rent'].cumsum()
     df['Interest Ratio'] = (df['Interest Paid']/df['Mortgage Payment']) * 100
+    df['Principal Paid Cumulative'] = df['Principal Paid'].cumsum()
     df['Profit and Liquidity'] = df['Rent'] + df['Principal Paid']
     df['Profit and Liquidity'] = df['Profit and Liquidity'].cumsum()
 

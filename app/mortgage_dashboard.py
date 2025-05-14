@@ -93,9 +93,11 @@ summary_values = {
     'Down Payment Opportunity Cost': df['Investment Loss'].sum(),
     'Property Value': params['price'],
     'Rent Saved': df.iloc[-1]['Rent Save Cumulative'],
+    'Total Equity Accumulated': df.iloc[-1]['Principal Paid Cumulative'] + params['down_payment'],
     'Total Cost': df.iloc[-1]["Costs Cumulative"],
     'Total Savings & Equity': df.iloc[-1]["Profit and Liquidity"],
     'Balance': df.iloc[-1]["Profit and Liquidity"] - (df.iloc[-1]["Costs Cumulative"] + params['price'] * mc.CLOSING_FEE),
+
 }
 
 
