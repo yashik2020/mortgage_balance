@@ -83,17 +83,18 @@ df = main_df[main_df['Period'] <= selected_period * params['year_freq'].value]
 
 #TODO: Send to calculations if possible
 summary_values = {
-    'Down Payment Amount': params['down_payment'],
-    'Mortgage Payment amount': df.iloc[1]['Mortgage Payment'],
     'Number of Payments': df.iloc[-1]['Period'],
+    'Down Payment Amount': params['down_payment'],
+    'Closing Fee': params['price'] * mc.CLOSING_FEE,
+    'Mortgage Payment amount': df.iloc[1]['Mortgage Payment'],
     'Total Interest': df.iloc[-1]['Interest Paid Cumulative'],
+    'Total Principal': df.iloc[-1]['Principal Paid Cumulative'],
     'Total Utility': df.iloc[-1]['Utility Paid Cumulative'],
     'Total Property Tax': df['Property Tax'].sum(),
-    'Closing Fee': params['price'] * mc.CLOSING_FEE,
     'Down Payment Opportunity Cost': df['Investment Loss'].sum(),
-    'Property Value': params['price'],
+    # 'Property Value': params['price'],
     'Rent Saved': df.iloc[-1]['Rent Save Cumulative'],
-    'Total Equity Accumulated': df.iloc[-1]['Principal Paid Cumulative'] + params['down_payment'],
+    'Total Equity': df.iloc[-1]['Principal Paid Cumulative'] + params['down_payment'],
     'Total Cost': df.iloc[-1]["Costs Cumulative"],
     'Total Savings & Equity': df.iloc[-1]["Profit and Liquidity"],
     'Balance': df.iloc[-1]["Profit and Liquidity"] - (df.iloc[-1]["Costs Cumulative"] + params['price'] * mc.CLOSING_FEE),
