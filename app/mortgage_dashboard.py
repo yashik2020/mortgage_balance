@@ -87,16 +87,18 @@ summary_values = {
     'Down Payment Amount': params['down_payment'],
     'Closing Fee': params['price'] * mc.CLOSING_FEE,
     'Mortgage Payment amount': df.iloc[1]['Mortgage Payment'],
+    # The costs
     'Total Interest': df.iloc[-1]['Interest Paid Cumulative'],
-    'Total Principal': df.iloc[-1]['Principal Paid Cumulative'],
     'Total Utility': df.iloc[-1]['Utility Paid Cumulative'],
     'Total Property Tax': df['Property Tax'].sum(),
     'Down Payment Opportunity Cost': df['Investment Loss'].sum(),
-    # 'Property Value': params['price'],
+    # The savings and equity
+    'Total Principal': df.iloc[-1]['Principal Paid Cumulative'],
     'Rent Saved': df.iloc[-1]['Rent Save Cumulative'],
     'Total Equity': df.iloc[-1]['Principal Paid Cumulative'] + params['down_payment'],
+    
     'Total Cost': df.iloc[-1]["Costs Cumulative"],
-    'Total Savings & Equity': df.iloc[-1]["Profit and Liquidity"],
+    'Total Savings & Equity': df.iloc[-1]['Rent Save Cumulative'] + df.iloc[-1]['Principal Paid Cumulative'],
     'Balance': df.iloc[-1]["Profit and Liquidity"] - (df.iloc[-1]["Costs Cumulative"] + params['price'] * mc.CLOSING_FEE),
 
 }
@@ -231,6 +233,23 @@ with col_right:
     )
     st.plotly_chart(fig_rolling_save)
     #\ Rolling Savings & Equity Breakdown Graph
+with col_left:
+    # Balance Bar Chart
+    fig_cost_benefit_diff = px.bar(
+                            x=df['Period'],
+                            y= df['Rent Save Cumulative'] - (df['Costs Cumulative'] ),
+                                                            #  + params['price'] * mc.CLOSING_FEE),
+                            title='Direct Balance',
+                            labels={'y': 'Balance (Rent Saved - Costs)', 'x': 'Period'}
+                            )
+    fig_cost_benefit_diff.update_traces(
+        marker_color=np.where(
+            df['Rent Save Cumulative'] - (df['Costs Cumulative'] ) < 0, 
+            'red', 
+            'green')
+            )
+    st.plotly_chart(fig_cost_benefit_diff) #, use_container_width=True)
+    #\ Balance Bar Chart
 
 
 #TODO: Remove raw dataframe from view
